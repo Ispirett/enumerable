@@ -40,3 +40,4 @@ module Enumerable
         result
     end
 end
+puts %w{ruby java react}.my_none? { |word| word.length >= 4 }
