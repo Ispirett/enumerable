@@ -28,4 +28,15 @@ module Enumerable
     def my_any?
         self.my_each { |item| return true if yield(item) }
     end
+
+    def my_none?
+        result = true
+        self.my_each do |item|
+            if yield(item)
+                result = false
+                break
+            end
+        end
+        result
+    end
 end
