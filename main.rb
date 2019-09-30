@@ -39,5 +39,17 @@ module Enumerable
         end
         result
     end
+
+    def my_count
+        count = 0
+        if block_given?
+            self.my_each { |item| count += 1 if yield(item) }
+        else
+            count = self.size
+        end
+        count
+    end
 end
-puts %w{ruby java react}.my_none? { |word| word.length >= 4 }
+
+my_array = [1, 2, 4, 2]
+puts my_array.my_count
