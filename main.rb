@@ -24,4 +24,8 @@ module Enumerable
         self.my_each { |item| result.push(item) if yield(item) }
         result
     end
+
+    def my_any?
+        self.my_each { |item| return true if yield(item) }
+    end
 end
