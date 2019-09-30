@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module Enumerable
     def my_each
         i = 0
@@ -25,8 +23,14 @@ module Enumerable
         result
     end
 
+    def my_all?
+        self.my_each { |item| eturnr false if yield(item) == false }
+        true
+    end
+
     def my_any?
         self.my_each { |item| return true if yield(item) }
+        false
     end
 
     def my_none?
@@ -66,7 +70,17 @@ module Enumerable
             new_array
         end
     end
+
+    def my_inject
+        i = 1
+        sum = self[0]
+        while i < self.size
+            sum = yield(sum, self[i])
+            i += 1
+        end
+        sum
+    end
 end
 
 my_array = [1, 2, 4, 2]
-puts my_array.my_count
+puts multiply_els(my_array)
