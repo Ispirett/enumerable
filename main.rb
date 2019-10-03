@@ -134,23 +134,34 @@ module Enumerable
       end
     end
 
-    def my_inject(arg1 = nil, arg2 = nil)
+    def my_inject(accumulator = nil, symbol = nil)
         begin
-            new_self = is_a?(Range) ? to_a : self
-            accumulator = (arg1.nil? || arg1.is_a?(Symbol)) ? new_self[0] : arg1
-            new_self[0..-1].my_each { |item| accumulator = yield(accumulator, item) } if block_given? && arg1
-            new_self[1..-1].my_each { |item| accumulator = yield(accumulator, item) } if block_given? && !arg1
-            new_self[1..-1].my_each { |i| accumulator = accumulator.send(arg1, i) } if arg1.is_a?(Symbol)
-            new_self[0..-1].my_each { |i| accumulator = accumulator.send(arg2, i) } if arg2
-            accumulator
+            array = to_a
+            if !accumulator.nil? && !symbol.nil?
+                array.my_each { |num| accumulator = accumulator.method(symbol).call(num) }
+                accumulator
+            elsif !accumulator.nil? && accumulator.is_a?(Symbol) && symbol.nil?
+                new_arr = clone.to_a
+                memo = new_arr.shift
+                new_arr.my_each { |num| memo = memo.method(accumulator).call(num) }
+                memo
+            elsif !accumulator.nil? && accumulator.is_a?(Integer) && symbol.nil?
+                array.my_each { |num| accumulator = yield(accumulator, num) }
+                accumulator
+            elsif accumulator.nil? && symbol.nil?
+                new_arr = clone.to_a
+                accumulator = new_arr.shift
+                new_arr.my_each { |num| accumulator = yield(accumulator, num) }
+                accumulator
+            end
         rescue => e
             puts "Exception Class: #{e.class.name}"
         end
     end
 end
 
-def multiply_els
-    my_inject(1) { |total, item| total * item }
+def multiply_els(array)
+    array.my_inject { |product, value| p product * value }
 end
 
 my_array = [1, 2, 4, 2]
