@@ -1,12 +1,16 @@
 module Enumerable
     def my_each
         begin
+            return to_enum unless block_given?
+
             i = 0
-            while i < self.size
-                yield (self[i])
-                i += 1
+            if block_given?
+                while i < self.size
+                    yield (self[i])
+                    i += 1
+                end
+                self
             end
-            self
         rescue => e
             puts "Exception Class: #{e.class.name}"
         end
@@ -14,11 +18,15 @@ module Enumerable
 
     def my_each_with_index
         begin
+            return to_enum unless block_given?
+
             i = 0
-            while i < self.size
-                yield(self[i], i)
-                i += 1
-                self
+            if block_given?
+                while i < self.size
+                    yield(self[i], i)
+                    i += 1
+                    self
+                end
             end
         rescue => e
             puts "Exception Class: #{e.class.name}"
@@ -27,6 +35,8 @@ module Enumerable
 
     def my_select
         begin
+            return to_enum unless block_given?
+
             result = []
             self.my_each { |item| result.push(item) if yield(item) }
             result
@@ -46,6 +56,9 @@ module Enumerable
             elsif value == nil && block_given?
                 self.each { |item| return false unless yield(item) }
                 true
+            elsif value.class == Class
+                my_each { |item| return false unless item.class == value }
+            elsif value.class == Regexp
             end
         rescue => e
             puts "Exception Class: #{e.class.name}"
@@ -63,22 +76,19 @@ module Enumerable
           elsif value == nil && block_given?
               self.each { |item| return true if yield(item) }
               false
+          elsif value.class == Class
+              my_each { |item| return true if item.class == value }
+          elsif value.class == Regexp
+              my_each { |item| return true if item =~ value }
           end
         rescue => e
             puts "Exception Class: #{e.class.name}"
       end
     end
 
-    def my_none?
+    def my_none?(pattern = nil, &block)
         begin
-          result = true
-          self.my_each do |item|
-              if yield(item)
-                  result = false
-                  break
-              end
-          end
-          result
+          !my_any?(pattern, &block)
         rescue => e
             puts "Exception Class: #{e.class.name}"
       end
@@ -92,7 +102,7 @@ module Enumerable
               count = self.size
           elsif value && !block_given?
               self.each { |item| count += 1 if item == value }
-  
+
           elsif value == nil && block_given?
               self.my_each { |item| count += 1 if yield(item) }
           end
@@ -124,27 +134,23 @@ module Enumerable
       end
     end
 
-    def my_inject(sum = nil)
-        i = 1
-
+    def my_inject(arg1 = nil, arg2 = nil)
         begin
-            if sum.nil?
-                sum = + self[0]
-            end
-
-            while i < self.size
-                sum = yield(sum, self[i])
-                i += 1
-            end
-            sum
+            new_self = is_a?(Range) ? to_a : self
+            accumulator = (arg1.nil? || arg1.is_a?(Symbol)) ? new_self[0] : arg1
+            new_self[0..-1].my_each { |item| accumulator = yield(accumulator, item) } if block_given? && arg1
+            new_self[1..-1].my_each { |item| accumulator = yield(accumulator, item) } if block_given? && !arg1
+            new_self[1..-1].my_each { |i| accumulator = accumulator.send(arg1, i) } if arg1.is_a?(Symbol)
+            new_self[0..-1].my_each { |i| accumulator = accumulator.send(arg2, i) } if arg2
+            accumulator
         rescue => e
             puts "Exception Class: #{e.class.name}"
         end
     end
 end
 
-def multiply_els(array)
-    array.my_inject { |product, item| product * item }
+def multiply_els
+    my_inject(1) { |total, item| total * item }
 end
 
 my_array = [1, 2, 4, 2]
