@@ -57,8 +57,11 @@ module Enumerable
                 self.each { |item| return false unless yield(item) }
                 true
             elsif value.class == Class
-                my_each { |item| return false unless item.class == value }
+                self.each { |item| return false unless item.class == value }
+                true
             elsif value.class == Regexp
+                self.each { |item| return false if (item =~ value).nil? }
+                true
             end
         rescue => e
             puts "Exception Class: #{e.class.name}"
@@ -78,20 +81,29 @@ module Enumerable
               false
           elsif value.class == Class
               my_each { |item| return true if item.class == value }
+              false
           elsif value.class == Regexp
               my_each { |item| return true if item =~ value }
+              false
           end
         rescue => e
             puts "Exception Class: #{e.class.name}"
       end
     end
 
-    def my_none?(pattern = nil, &block)
-        begin
-          !my_any?(pattern, &block)
-        rescue => e
-            puts "Exception Class: #{e.class.name}"
-      end
+    def my_none?(value = nil)
+        if block_given?
+            self.each { |item| return false if yield(item) }
+        elsif value.class == Class
+            self.each { |item| return false if item.class == value }
+        elsif value.class == Regexp
+            self.each { |item| return false if item =~ value }
+        elsif value.nil?
+            self.each { |item| return false if item }
+        else
+            self.each { |item| return false if item == value }
+        end
+        true
     end
 
     def my_count(value = nil)
