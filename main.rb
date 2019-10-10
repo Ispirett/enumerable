@@ -47,22 +47,18 @@ module Enumerable
 
     def my_all?(value = nil)
         begin
-            if value == nil && !block_given?
-                self.each { |item| return false unless item }
-                true
-            elsif value && !block_given?
-                self.each { |item| return false unless item == value }
-                true
-            elsif value == nil && block_given?
+            if block_given?
                 self.each { |item| return false unless yield(item) }
-                true
             elsif value.class == Class
                 self.each { |item| return false unless item.class == value }
-                true
             elsif value.class == Regexp
                 self.each { |item| return false if (item =~ value).nil? }
-                true
+            elsif !value.nil?
+                self.each { |item| return false unless item == value }
+            elsif value.nil?
+                self.each { |item| return false unless item }
             end
+            true
         rescue => e
             puts "Exception Class: #{e.class.name}"
         end
@@ -70,22 +66,18 @@ module Enumerable
 
     def my_any?(value = nil)
         begin
-          if value == nil && !block_given?
-              self.each { |item| return true if item }
-              false
-          elsif value && !block_given?
-              self.each { |item| return true if item == value }
-              false
-          elsif value == nil && block_given?
+          if block_given?
               self.each { |item| return true if yield(item) }
-              false
-          elsif value.class == Class
-              my_each { |item| return true if item.class == value }
-              false
-          elsif value.class == Regexp
-              my_each { |item| return true if item =~ value }
-              false
+          elsif arg.class == Class
+              self.each { |item| return true if item.class == value }
+          elsif arg.class == Regexp
+              self.each { |item| return true if item =~ value }
+          elsif arg.nil?
+              self.each { |item| return true if item }
+          else
+              self.each { |item| return true if item == value }
           end
+          false
         rescue => e
             puts "Exception Class: #{e.class.name}"
       end
