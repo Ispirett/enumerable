@@ -66,21 +66,21 @@ module Enumerable
 
     def my_any?(value = nil)
         begin
-          if block_given?
-              self.each { |item| return true if yield(item) }
-          elsif arg.class == Class
-              self.each { |item| return true if item.class == value }
-          elsif arg.class == Regexp
-              self.each { |item| return true if item =~ value }
-          elsif arg.nil?
-              self.each { |item| return true if item }
-          else
-              self.each { |item| return true if item == value }
-          end
-          false
+            if block_given?
+                self.each { |item| return true if yield(item) }
+            elsif value.class == Class
+                self.each { |item| return true if item.class == value }
+            elsif value.class == Regexp
+                self.each { |item| return true if item =~ value }
+            elsif value.nil?
+                self.each { |item| return true if item }
+            else
+                self.each { |item| return true if item == value }
+            end
+            false
         rescue => e
             puts "Exception Class: #{e.class.name}"
-      end
+        end
     end
 
     def my_none?(value = nil)
